@@ -1,0 +1,23 @@
+{
+  "name": "code-anima",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "build": "browserify src/index.js -o build.js",
+    "watch": "watchify src/index.js -o build.js",
+    "test": "mocha -R dot",
+    "test-watch": "npm run test -- --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "browserify": "^16.2.2",
+    "mocha": "^5.2.0",
+    "watchify": "^3.11.0"
+  }
+}
