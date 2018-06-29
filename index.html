@@ -1,0 +1,47 @@
+<!doctype html>
+
+<style type="text/css">
+    textarea {
+        width: 300px;
+        height: 150px;
+    }
+
+    button {
+        background: #eee;
+        padding: 4px;
+    }
+</style>
+
+<textarea id="capture"></textarea>
+<button id="play">Play</button>
+<pre id="render"></pre>
+
+<script type="text/javascript" src="build.js"></script>
+<script type="text/javascript">
+    var capturer = new Capturer;
+    var textarea = document.getElementById('capture');
+
+    textarea.addEventListener('keydown', capturer.capture);
+
+    var output = document.getElementById('render');
+    var play = document.getElementById('play');
+    var playDelay = 40 + Math.random() * 60;
+    play.addEventListener('click', function () {
+        var captured = capturer.getCaptured();
+        var rendered = renderer.render(captured);
+
+        textarea.disabled = true;
+        for (var i = 0; i < rendered.length; i++) {
+            (function () {
+                var curr = i;
+                setTimeout(function () {
+                    output.textContent = rendered[curr];
+                    if (curr === rendered.length - 1) {
+                        textarea.disabled = false;
+                    }
+                }, playDelay * curr);
+            })();
+        }
+    });
+    var renderer = new Renderer;
+</script>
