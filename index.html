@@ -1,6 +1,10 @@
 <!doctype html>
 
+<meta charset="utf-8">
+
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.39.0/codemirror.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.39.0/theme/ambiance.min.css" />
 
 <style type="text/css">
     textarea {
@@ -34,10 +38,14 @@
       </div>
     </div>
     <div class="row">
-        <pre id="render"></pre>
+        <div class="col-sm">
+            <div id="render"></div>
+        </div>
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.39.0/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.39.0/mode/javascript/javascript.min.js"></script>
 <script type="text/javascript" src="build.js"></script>
 <script type="text/javascript">
     function parseAsArray(value) {
@@ -59,9 +67,21 @@
     });
 
     playbook.addEventListener('input', function () {
-        var parsed = parseAsArray(playbook.value)
+        var parsed = parseAsArray(playbook.value);
         capturer.captured = parsed;
         renderer.setPlaybook(parsed);
+
+        var tmpRenderer = new Renderer;
+        tmpRenderer.setPlaybook(parsed);
+
+        var finished = false;
+        while (!finished) {
+            var result = tmpRenderer.getNext();
+            if (result.code === 2) {
+                finished = true;
+                textarea.value = result.output;
+            }
+        }
     });
 
     var stop = document.getElementById('stop');
@@ -72,16 +92,26 @@
     });
 
     var renderer = new Renderer;
-    var output = document.getElementById('render');
     var play = document.getElementById('play');
 
-    play.addEventListener('click', renderNext);
+    var cm = CodeMirror(document.getElementById('render'), {
+      value: " ",
+      mode:  "javascript",
+      theme:  "ambiance",
+    })
+
+    play.addEventListener('click', function () {
+        play.disabled = true;
+        renderNext();
+    });
     function renderNext() {
         var result = renderer.getNext();
-        output.textContent = result.output;
+        cm.getDoc().setValue(result.output);
 
         if (result.code === 0) {
             setTimeout(renderNext, 40 + Math.random() * 60);
+        } else {
+            play.disabled = false;
         }
     }
 </script>
