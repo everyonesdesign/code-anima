@@ -2,116 +2,199 @@ var assert = require('assert');
 var Renderer = require('../src/renderer');
 
 describe('Renderer', function() {
-  it('adds letters', function () {
+  it('treats letters correctly', function () {
     var renderer = new Renderer;
+    var results = [];
 
-    var output = renderer.render([
-      [0, 'a'],
-      [1, 'b'],
-      [2, 'c'],
+    renderer.setPlaybook([[0,"a"],[1,"b"]]);
+    results.push(renderer.getNext());
+    results.push(renderer.getNext());
+    results.push(renderer.getNext());
+    results.push(renderer.getNext());
+
+    assert.deepEqual(results, [
+      {
+        code: 0,
+        output: 'a',
+      },
+      {
+        code: 0,
+        output: 'ab',
+      },
+      {
+        code: 2,
+        output: 'ab',
+      },
+      {
+        code: 2,
+        output: 'ab',
+      },
     ]);
+  });
 
-    assert.deepEqual(output, [
-      'a',
-      'ab',
-      'abc',
+  it('allows to reset current playing', function () {
+    var renderer = new Renderer;
+    var results = [];
+
+    renderer.setPlaybook([[0,"a"]]);
+    results.push(renderer.getNext());
+    results.push(renderer.getNext());
+    renderer.reset();
+    results.push(renderer.getNext());
+    results.push(renderer.getNext());
+
+    assert.deepEqual(results, [
+      {
+        code: 0,
+        output: 'a',
+      },
+      {
+        code: 2,
+        output: 'a',
+      },
+      {
+        code: 0,
+        output: 'a',
+      },
+      {
+        code: 2,
+        output: 'a',
+      },
     ]);
   });
 
   it('pushes letters if the same position is used', function () {
     var renderer = new Renderer;
+    var results = [];
 
-    var output = renderer.render([
-      [0, 'c'],
-      [0, 'b'],
-      [0, 'a'],
-    ]);
+    renderer.setPlaybook([[0,"a"],[0,"b"]]);
+    results.push(renderer.getNext());
+    results.push(renderer.getNext());
+    results.push(renderer.getNext());
 
-    assert.deepEqual(output, [
-      'c',
-      'bc',
-      'abc',
+    assert.deepEqual(results, [
+      {
+        code: 0,
+        output: 'a',
+      },
+      {
+        code: 0,
+        output: 'ba',
+      },
+      {
+        code: 2,
+        output: 'ba',
+      },
     ]);
   });
 
   it('removes letter by delete', function () {
     var renderer = new Renderer;
+    var results = [];
 
-    var output = renderer.render([
-      [0, 'c'],
-      [0, 'b'],
-      [0, 'Delete'],
-    ]);
+    renderer.setPlaybook([[0,"c"],[0,"b"],[0,"Delete"]]);
+    results.push(renderer.getNext());
+    results.push(renderer.getNext());
+    results.push(renderer.getNext());
+    results.push(renderer.getNext());
 
-    assert.deepEqual(output, [
-      'c',
-      'bc',
-      'c',
+    assert.deepEqual(results, [
+      {
+        code: 0,
+        output: 'c',
+      },
+      {
+        code: 0,
+        output: 'bc',
+      },
+      {
+        code: 0,
+        output: 'c',
+      },
+      {
+        code: 2,
+        output: 'c',
+      },
     ]);
   });
 
-  it('removes letter by backspace', function () {
+  it('removes letter by delete', function () {
     var renderer = new Renderer;
+    var results = [];
 
-    var output = renderer.render([
-      [0, 'c'],
-      [0, 'b'],
-      // position is different due to cursor position
-      [1, 'Backspace'],
-    ]);
+    renderer.setPlaybook([[0,"c"],[0,"b"],[1,"Backspace"]]);
+    results.push(renderer.getNext());
+    results.push(renderer.getNext());
+    results.push(renderer.getNext());
+    results.push(renderer.getNext());
 
-    assert.deepEqual(output, [
-      'c',
-      'bc',
-      'c',
+    assert.deepEqual(results, [
+      {
+        code: 0,
+        output: 'c',
+      },
+      {
+        code: 0,
+        output: 'bc',
+      },
+      {
+        code: 0,
+        output: 'c',
+      },
+      {
+        code: 2,
+        output: 'c',
+      },
     ]);
   });
 
   it('adds newline by enter', function () {
     var renderer = new Renderer;
+    var results = [];
 
-    var output = renderer.render([
-      [0, 'Enter'],
-    ]);
+    renderer.setPlaybook([[0,"Enter"]]);
+    results.push(renderer.getNext());
+    results.push(renderer.getNext());
 
-    assert.deepEqual(output, [
-      '\n',
-    ]);
-  });
-
-  it('renders as clean function', function () {
-    var renderer = new Renderer;
-
-    renderer.render([
-      [0, 'a'],
-      [1, 'b'],
-    ]);
-
-    var output = renderer.render([
-      [0, 'a'],
-      [1, 'b'],
-    ]);
-
-    assert.deepEqual(output, [
-      'a',
-      'ab',
+    assert.deepEqual(results, [
+      {
+        code: 0,
+        output: '\n',
+      },
+      {
+        code: 2,
+        output: '\n',
+      },
     ]);
   });
 
-  it('doesnt render stops', function () {
+  it('renders stops correctly', function () {
     var renderer = new Renderer;
+    var results = [];
 
-    renderer.render([
-      [0, 'a'],
-      [null, 'STOP'],
-    ]);
+    renderer.setPlaybook([[0,"a"],[null,"STOP"],[1,"b"]]);
+    results.push(renderer.getNext());
+    results.push(renderer.getNext());
+    results.push(renderer.getNext());
+    results.push(renderer.getNext());
 
-    var output = renderer.render([
-      [0, 'a'],
-    ]);
-
-    assert.deepEqual(output, [
-      'a',
+    assert.deepEqual(results, [
+      {
+        code: 0,
+        output: 'a',
+      },
+      {
+        code: 1,
+        output: 'a',
+      },
+      {
+        code: 0,
+        output: 'ab',
+      },
+      {
+        code: 2,
+        output: 'ab',
+      },
     ]);
   });
 });

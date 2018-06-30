@@ -1,28 +1,71 @@
-function Renderer() {}
+var RESULT_CODES = {
+  SUCCESS: 0,
+  STOP: 1,
+  END: 2,
+};
 
-Renderer.prototype.render = function (input) {
-  var self = this;
-  var symbols = [];
-  var output = [];
+function Renderer() {
+  this.playbook = [];
+  this.reset();
+}
 
-  input.forEach(function (i) {
-    var pos = i[0];
-    var value = i[1];
+Renderer.prototype.getNext = function () {
+  var rendered = this.render();
+  var currentSymbol = this.playbook[this.currentIndex - 1];
 
-    if (value === 'Backspace') {
-      symbols.splice(pos - 1, 1);
-    } else if (value === 'Delete') {
-      symbols.splice(pos, 1);
-    } else if (value === 'Enter') {
-      symbols.splice(pos, 0, '\n');
-    } else {
-      symbols.splice(pos, 0, value);
+  if (currentSymbol) {
+    this.currentIndex++;
+
+    if (currentSymbol[1] === 'STOP') {
+      return {
+        output: rendered,
+        code: RESULT_CODES.STOP,
+      };
     }
 
-    output.push(symbols.join(''))
-  });
+    return {
+      output: rendered,
+      code: RESULT_CODES.SUCCESS,
+    };
+  }
 
-  return output;
+  return {
+    output: rendered,
+    code: RESULT_CODES.END,
+  };
+};
+
+Renderer.prototype.render = function () {
+  var symbols = [];
+
+  this.playbook
+    .slice(0, this.currentIndex)
+    .forEach(function (item) {
+      var pos = item[0];
+      var value = item[1];
+
+      if (value === 'Backspace') {
+        symbols.splice(pos - 1, 1);
+      } else if (value === 'Delete') {
+        symbols.splice(pos, 1);
+      } else if (value === 'Enter') {
+        symbols.splice(pos, 0, '\n');
+      } else if (value === 'STOP') {
+        // skipping...
+      } else {
+        symbols.splice(pos, 0, value);
+      }
+    });
+
+  return symbols.join('');
+};
+
+Renderer.prototype.setPlaybook = function (playbook) {
+  this.playbook = playbook;
+};
+
+Renderer.prototype.reset = function () {
+  this.currentIndex = 1;
 };
 
 module.exports = Renderer;
