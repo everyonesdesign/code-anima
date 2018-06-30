@@ -32,6 +32,25 @@ describe('Renderer', function() {
     ]);
   });
 
+  it('setPlaybook sets empty array in case of failure', function () {
+    var renderer = new Renderer;
+
+    renderer.setPlaybook('');
+    assert.deepEqual(renderer.playbook, []);
+
+    renderer.setPlaybook(123);
+    assert.deepEqual(renderer.playbook, []);
+
+    renderer.setPlaybook(undefined);
+    assert.deepEqual(renderer.playbook, []);
+
+    renderer.setPlaybook(null);
+    assert.deepEqual(renderer.playbook, []);
+
+    renderer.setPlaybook(NaN);
+    assert.deepEqual(renderer.playbook, []);
+  });
+
   it('allows to reset current playing', function () {
     var renderer = new Renderer;
     var results = [];
@@ -58,6 +77,27 @@ describe('Renderer', function() {
       },
       {
         code: 2,
+        output: 'a',
+      },
+    ]);
+  });
+
+  it('resets during playbook update', function () {
+    var renderer = new Renderer;
+    var results = [];
+
+    renderer.setPlaybook([[0,"a"]]);
+    results.push(renderer.getNext());
+    renderer.setPlaybook([[0,"a"]]);
+    results.push(renderer.getNext());
+
+    assert.deepEqual(results, [
+      {
+        code: 0,
+        output: 'a',
+      },
+      {
+        code: 0,
         output: 'a',
       },
     ]);

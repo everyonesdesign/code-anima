@@ -61,7 +61,8 @@ Renderer.prototype.render = function () {
 };
 
 Renderer.prototype.setPlaybook = function (playbook) {
-  this.playbook = playbook;
+  this.reset();
+  this.playbook = Array.isArray(playbook) ? playbook : [];
 };
 
 Renderer.prototype.reset = function () {

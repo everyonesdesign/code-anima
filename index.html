@@ -40,6 +40,14 @@
 
 <script type="text/javascript" src="build.js"></script>
 <script type="text/javascript">
+    function parseAsArray(value) {
+        try {
+            return JSON.parse(value);
+        } catch(e) {
+            return [];
+        }
+    }
+
     var capturer = new Capturer;
     var textarea = document.getElementById('capture');
     var playbook = document.getElementById('playbook');
@@ -47,36 +55,33 @@
     textarea.addEventListener('keydown', function (e) {
         capturer.capture(e);
         playbook.value = JSON.stringify(capturer.getCaptured());
+        renderer.setPlaybook(parseAsArray(playbook.value));
+    });
+
+    playbook.addEventListener('input', function () {
+        var parsed = parseAsArray(playbook.value)
+        capturer.captured = parsed;
+        renderer.setPlaybook(parsed);
     });
 
     var stop = document.getElementById('stop');
     stop.addEventListener('click', function () {
         capturer.addStop();
+        playbook.value = JSON.stringify(capturer.getCaptured());
+        renderer.setPlaybook(parseAsArray(playbook.value));
     });
 
     var renderer = new Renderer;
     var output = document.getElementById('render');
     var play = document.getElementById('play');
-    var playDelay = 40 + Math.random() * 60;
-    play.addEventListener('click', function () {
-        var captured = JSON.parse(playbook.value);
-        var rendered = renderer.render(captured);
 
-        if (!captured.length) {
-            return;
-        }
+    play.addEventListener('click', renderNext);
+    function renderNext() {
+        var result = renderer.getNext();
+        output.textContent = result.output;
 
-        textarea.disabled = true;
-        for (var i = 0; i < rendered.length; i++) {
-            (function () {
-                var curr = i;
-                setTimeout(function () {
-                    output.textContent = rendered[curr];
-                    if (curr === rendered.length - 1) {
-                        textarea.disabled = false;
-                    }
-                }, playDelay * curr);
-            })();
+        if (result.code === 0) {
+            setTimeout(renderNext, 40 + Math.random() * 60);
         }
-    });
+    }
 </script>
