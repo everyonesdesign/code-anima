@@ -1,5 +1,7 @@
 <!doctype html>
 
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+
 <style type="text/css">
     textarea {
         width: 300px;
@@ -12,23 +14,57 @@
     }
 </style>
 
-<textarea id="capture"></textarea>
-<button id="play">Play</button>
-<pre id="render"></pre>
+<div class="container">
+    <div class="row">
+      <div class="col-sm">
+        <p>
+            <textarea class="form-control" id="capture" placeholder="Type your text here..."></textarea>
+        </p>
+        <p>
+            <button class="btn btn-secondary" id="stop">Add stop</button>
+        </p>
+      </div>
+      <div class="col-sm">
+        <p>
+            <textarea class="form-control" id="playbook">[]</textarea>
+        </p>
+        <p>
+            <button class="btn btn-primary" id="play">Play</button>
+        </p>
+      </div>
+    </div>
+    <div class="row">
+        <pre id="render"></pre>
+    </div>
+</div>
 
 <script type="text/javascript" src="build.js"></script>
 <script type="text/javascript">
     var capturer = new Capturer;
     var textarea = document.getElementById('capture');
+    var playbook = document.getElementById('playbook');
 
-    textarea.addEventListener('keydown', capturer.capture);
+    textarea.addEventListener('keydown', function (e) {
+        capturer.capture(e);
+        playbook.value = JSON.stringify(capturer.getCaptured());
+    });
 
+    var stop = document.getElementById('stop');
+    stop.addEventListener('click', function () {
+        capturer.addStop();
+    });
+
+    var renderer = new Renderer;
     var output = document.getElementById('render');
     var play = document.getElementById('play');
     var playDelay = 40 + Math.random() * 60;
     play.addEventListener('click', function () {
-        var captured = capturer.getCaptured();
+        var captured = JSON.parse(playbook.value);
         var rendered = renderer.render(captured);
+
+        if (!captured.length) {
+            return;
+        }
 
         textarea.disabled = true;
         for (var i = 0; i < rendered.length; i++) {
@@ -43,5 +79,4 @@
             })();
         }
     });
-    var renderer = new Renderer;
 </script>

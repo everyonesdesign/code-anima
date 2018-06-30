@@ -48,4 +48,8 @@ Capturer.prototype.validateKey = function (key) {
   return false;
 };
 
+Capturer.prototype.addStop = function () {
+  this.captured.push([null, 'STOP']);
+};
+
 module.exports = Capturer;

@@ -214,4 +214,25 @@ describe('Capturer', function() {
       assert.deepEqual(capturer.getCaptured(), []);
     });
   });
+
+  describe('#addStop', function () {
+    it('adds special STOP symbol', function () {
+      var capturer = new Capturer;
+
+      capturer.capture({
+        key: 'a',
+        target: {
+          selectionStart: 0,
+          selectionEnd: 0,
+        },
+      });
+
+      capturer.addStop();
+
+      assert.deepEqual(capturer.getCaptured(), [
+        [0, 'a'],
+        [null, 'STOP'],
+      ]);
+    });
+  });
 });

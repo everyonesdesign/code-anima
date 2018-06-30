@@ -97,4 +97,21 @@ describe('Renderer', function() {
       'ab',
     ]);
   });
+
+  it('doesnt render stops', function () {
+    var renderer = new Renderer;
+
+    renderer.render([
+      [0, 'a'],
+      [null, 'STOP'],
+    ]);
+
+    var output = renderer.render([
+      [0, 'a'],
+    ]);
+
+    assert.deepEqual(output, [
+      'a',
+    ]);
+  });
 });
